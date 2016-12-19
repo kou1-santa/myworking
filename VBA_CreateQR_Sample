@@ -1,0 +1,38 @@
+Sub Sample()
+    Dim mail As String
+    Dim sheet As Worksheet
+    Dim size As Integer
+    Dim rng As Range
+    size = 100
+    
+    'サンプルとしてA1に入っている文字列をA2セルの左上を基点にサイズ100で作成
+    Set sheet = ThisWorkbook.ActiveSheet
+    Set rng = sheet.Range("A2")
+    mail = sheet.Range("A1").Value
+
+   Call CreateQR(mail, size, rng.left, rng.top)
+End Sub
+
+'QRコードつくっているやつ(要インターネット接続、不要Accessインストール版
+Sub CreateQR(str As String, size As Integer, left As Single, top As Single)
+    On Error GoTo ErrHandle
+    Dim pic  As shape
+
+'指定した範囲の左上座標を起点にサイズ指定したQRコードをダウンロードして貼り付け
+'https://msdn.microsoft.com/ja-jp/library/office/ff198302.aspx
+    Set pic = ActiveSheet.Shapes.AddPicture( _
+        FileName:=CreateGoogleCode(str, size), _
+        LinkToFile:=False, SaveWithDocument:=True, _
+        left:=left, top:=top, _
+        Width:=size, Height:=size)
+    Exit Sub
+ErrHandle:
+    MsgBox Err.Description
+End Sub
+
+'Google Chart APIを利用して文字列をQRコードに変換
+Private Function CreateGoogleCode(str As String, size As Integer) As String
+    CreateGoogleCode = "http://chart.apis.google.com/chart?cht=qr&chs=" & _
+                size & "x" & size & "&choe=UTF-8&chld=Q|1&chl=" & _
+                        Application.WorksheetFunction.EncodeURL(str)
+End Function
